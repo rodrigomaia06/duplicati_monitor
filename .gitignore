@@ -1,3 +1,4 @@
 /target
 /.env
 /duplicati_monitor.code-workspace
+/.vscode
