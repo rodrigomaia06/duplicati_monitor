@@ -87,6 +87,15 @@ The application supports the following environment variables for customization:
 | **`DEBUG_MODE`**            | Enables verbose logging.                                                                     | `false`                                                           | Optional                                                                            |
 
 
+## Setup Duplicati
+
+Add theses two options for each backup you want to monitor:
+
+- **send-http-result-output-format**: json
+- **send-http-url**: http://**IP_ADDRESS**:**PORT**/report
+
+![advanced-options](img/advanced-options.png)
+
 ## Debug Mode
 
 Enable debug mode by setting `DEBUG_MODE=true` in the environment variables. This will log additional information, useful for troubleshooting.
