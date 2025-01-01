@@ -46,9 +46,6 @@ WORKDIR /app
 # Copy the built application from the builder stage
 COPY --from=builder /app/target/release/duplicati_monitor /app/
 
-# Copy additional files (like .env or configs)
-COPY .env /app/
-
 # Expose the port (choose a port that’s not commonly used)
 EXPOSE 5050
 
