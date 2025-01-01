@@ -1,4 +1,4 @@
-duplicati monitor
+Duplicati Monitor
 Copyright (C) 2025
 
 This program is free software: you can redistribute it and/or modify
