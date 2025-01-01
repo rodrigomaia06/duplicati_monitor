@@ -11,9 +11,10 @@ use std::error::Error;
 use std::net::SocketAddr;
 use tokio::net::TcpListener;
 use reqwest::Client;
-
-use dotenv::dotenv;
 use colored::*;
+
+//For development
+//use dotenv::dotenv;
 
 // Define the structure for the JSON payload
 #[derive(Deserialize, Debug)]
@@ -58,7 +59,7 @@ struct ExtraInfo {
 struct GotifyPayload {
     title: String,
     message: String,
-    priority: i32,
+    priority: u32,
 }
 
 fn is_debug_mode() -> bool {
@@ -69,35 +70,33 @@ fn is_debug_mode() -> bool {
 }
 
 async fn construct_gotify_payload(Json(duplicati_payload): Json<DuplicatiPayload>) -> Result<GotifyPayload, Box<dyn Error>> {
-    if is_debug_mode() {
-        println!("{}", "[DEBUG] Received DuplicatiPayload:".blue().bold());
-        println!("{:?}", duplicati_payload);
-    }
+    
+    print!("{}", "[INFO] Received DuplicatiPayload: ".green().bold());
+    println!("{:?}", duplicati_payload);
+    
 
     let parsed_result = &duplicati_payload.data.parsed_result;
-    let mut title;
+    let title;
 
     if parsed_result == "Success" {
-        title = env::var("GOTIFY_SUCCESS_PREFIX").unwrap_or_else(|_| "🟩".to_string());
+        title = env::var("GOTIFY_SUCCESS_MESSAGE").unwrap_or_else(|_| format!("💾🟢 Duplicati {}: {}", duplicati_payload.extra.operation_name, duplicati_payload.extra.backup_name));
     } else if parsed_result == "Warning" {
-        title = env::var("GOTIFY_WARNING_PREFIX").unwrap_or_else(|_| "🟨".to_string());
+        title = env::var("GOTIFY_WARNING_MESSAGE").unwrap_or_else(|_| format!("💾🟡 Duplicati {}: {}", duplicati_payload.extra.operation_name, duplicati_payload.extra.backup_name));
     } else if parsed_result == "Error" {
-        title = env::var("GOTIFY_ERROR_PREFIX").unwrap_or_else(|_| "🟥".to_string());
+        title = env::var("GOTIFY_ERROR_MESSAGE").unwrap_or_else(|_| format!("💾🔴 Duplicati {}: {}", duplicati_payload.extra.operation_name, duplicati_payload.extra.backup_name));
     } else {
         println!("{}", "[ERROR] Unknown parsed_result.".red().bold());
         return Err(format!("Unknown parsed_result: {}", parsed_result).into());
     };
 
-    title.push_str(&format!(" {}: {}", duplicati_payload.extra.operation_name, duplicati_payload.extra.backup_name));
-
     if is_debug_mode() {
-        println!("{}", "[DEBUG] Title constructed:".blue().bold());
+        print!("{}", "[DEBUG] Title constructed: ".blue().bold());
         println!("{}", title);
     }
 
     let list_message_items = env::var("GOTIFY_MESSAGE_ITEMS").unwrap_or_else(|_| "backup_name,machine_name,operation_name,deleted_files,added_files,examined_files,size_of_added_files,main_operation,parsed_result,duration".to_string());
     if is_debug_mode() {
-        println!("{}", "[DEBUG] GOTIFY_MESSAGE_ITEMS:".blue().bold());
+        print!("{}", "[DEBUG] GOTIFY_MESSAGE_ITEMS: ".blue().bold());
         println!("{}", list_message_items);
     }
 
@@ -128,7 +127,13 @@ async fn construct_gotify_payload(Json(duplicati_payload): Json<DuplicatiPayload
                 message.push_str(&format!("Parsed Result: {}\n", duplicati_payload.data.parsed_result));
             }
             "duration" => {
-                message.push_str(&format!("Duration: {}s\n", duplicati_payload.data.duration));
+                message.push_str(&format!("Duration: {}\n", duplicati_payload.data.duration));
+            }
+            "operation_name" => {
+                message.push_str(&format!("Operation Name: {}\n", duplicati_payload.extra.operation_name));
+            }
+            "backup_name" => {
+                message.push_str(&format!("Backup Name: {}\n", duplicati_payload.extra.backup_name));
             }
             _ => {
                 message.push_str(&format!("Unknown Item: {}\n", item));
@@ -137,7 +142,7 @@ async fn construct_gotify_payload(Json(duplicati_payload): Json<DuplicatiPayload
     }
 
     if is_debug_mode() {
-        println!("{}", "[DEBUG] Constructed message:".blue().bold());
+        print!("{}", "[DEBUG] Constructed message:".blue().bold());
         println!("{}", message);
     }
 
@@ -146,11 +151,11 @@ async fn construct_gotify_payload(Json(duplicati_payload): Json<DuplicatiPayload
     let gotify_payload = GotifyPayload {
         title,
         message,
-        priority: priority_env.parse::<i32>().unwrap_or(10),
+        priority: priority_env.parse::<u32>().unwrap_or(10),
     };
 
     if is_debug_mode() {
-        println!("{}", "[DEBUG] Final GotifyPayload:".blue().bold());
+        print!("{}", "[DEBUG] Final GotifyPayload: ".blue().bold());
         println!("{:?}", gotify_payload);
     }
 
@@ -159,7 +164,7 @@ async fn construct_gotify_payload(Json(duplicati_payload): Json<DuplicatiPayload
 
 async fn gotify_send(gotify_payload: GotifyPayload) -> Result<bool, String> {
     if is_debug_mode() {
-        println!("{}", "[DEBUG] Sending GotifyPayload:".blue().bold());
+        print!("{}", "[DEBUG] Sending GotifyPayload: ".blue().bold());
         println!("{:?}", gotify_payload);
     }
 
@@ -167,15 +172,16 @@ async fn gotify_send(gotify_payload: GotifyPayload) -> Result<bool, String> {
     let app_token = env::var("GOTIFY_APP_TOKEN").expect("GOTIFY_APP_TOKEN is not set");
 
     if is_debug_mode() {
-        println!("{}", "[DEBUG] GOTIFY_SERVER_URL:".blue().bold());
+        print!("{}", "[DEBUG] GOTIFY_SERVER_URL: ".blue().bold());
         println!("{}", server_url);
-        println!("{}", "[DEBUG] GOTIFY_APP_TOKEN: [REDACTED]".blue().bold());
+        print!("{}", "[DEBUG] GOTIFY_APP_TOKEN: ".blue().bold());
+        println!("{}", app_token);
     }
 
     let url = format!("{}/message?token={}", server_url, app_token);
 
     if is_debug_mode() {
-        println!("{}", "[DEBUG] Final URL:".blue().bold());
+        print!("{}", "[DEBUG] Final URL: ".blue().bold());
         println!("{}", url);
     }
 
@@ -190,7 +196,7 @@ async fn gotify_send(gotify_payload: GotifyPayload) -> Result<bool, String> {
     match response {
         Ok(resp) => {
             if is_debug_mode() {
-                println!("{}", "[DEBUG] Response Status:".blue().bold());
+                print!("{}", "[DEBUG] Response Status: ".blue().bold());
                 println!("{}", resp.status());
             }
             if resp.status().is_success() {
@@ -210,7 +216,7 @@ async fn gotify_send(gotify_payload: GotifyPayload) -> Result<bool, String> {
 
 async fn report_handler(Json(duplicati_payload): Json<DuplicatiPayload>) -> impl IntoResponse {
     if is_debug_mode() {
-        println!("{}", "[DEBUG] Handling /report with payload:".blue().bold());
+        print!("{}", "[DEBUG] Handling /report with payload: ".blue().bold());
         println!("{:?}", duplicati_payload);
     }
 
@@ -240,7 +246,8 @@ async fn report_handler(Json(duplicati_payload): Json<DuplicatiPayload>) -> impl
 
 #[tokio::main]
 async fn main() {
-    dotenv().ok();
+    //For development
+    //dotenv().ok();
 
     // Define the list of environment variables you want to filter
     let filtered_env_vars = vec![
@@ -250,22 +257,29 @@ async fn main() {
         "GOTIFY_PRIORITY",
         "GOTIFY_MESSAGE_ITEMS",
         "GOTIFY_TITLE",
-        "GOTIFY_SUCCESS_PREFIX",
-        "GOTIFY_WARNING_PREFIX",
-        "GOTIFY_ERROR_PREFIX",
+        "GOTIFY_SUCCESS_MESSAGE",
+        "GOTIFY_WARNING_MESSAGE",
+        "GOTIFY_ERROR_MESSAGE",
     ];
 
     // Print filtered environment variables
     println!("{}", "[INFO] Listing selected environment variables at startup:".green().bold());
     for (key, value) in std::env::vars() {
         if filtered_env_vars.contains(&key.as_str()) {
-            // Sensitive values like tokens will be displayed as REDACTED
+            // Redact sensitive values, but show the last four characters
             let display_value = if key.to_lowercase().contains("token") {
-                "[REDACTED]".yellow().to_string()
+                let masked_length = if value.len() > 4 { value.len() - 4 } else { 0 };
+                format!(
+                    "{}{}",
+                    "*".repeat(masked_length),
+                    &value[value.len().saturating_sub(4)..]
+                )
+                .yellow()
+                .to_string()
             } else {
                 value.blue().to_string()
             };
-
+    
             println!("{}: {}", key.cyan().bold(), display_value);
         }
     }
@@ -274,7 +288,7 @@ async fn main() {
         println!("{}", "[DEBUG] Environment variables loaded.".blue().bold());
     }
 
-    let addr = SocketAddr::from(([127, 0, 0, 1], 8000));
+    let addr = SocketAddr::from(([0, 0, 0, 0], 5050));
     let tcp = TcpListener::bind(&addr).await.unwrap();
 
     println!("{}", format!("[INFO] Server starting at http://{}", addr).green().bold());
