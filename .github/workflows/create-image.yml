@@ -1,4 +1,4 @@
-name: Docker Build and Push for Rust App
+name: Docker Build and Push for duplicati_monitor
 
 on:
   push:
