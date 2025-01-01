@@ -25,7 +25,7 @@ Duplicati Monitor is a Rust-based application designed to monitor Duplicati back
    ```bash
    docker run -d \
        -p 5050:5050 \
-       -e GOTIFY_SERVER_URL="<example.internal.org>" \
+       -e GOTIFY_SERVER_URL="<https://example.internal.org>" \
        -e GOTIFY_APP_TOKEN="AOF***-ZHx9u****" \
        -e GOTIFY_SUCCESS_MESSAGE="🟩 Backup succeeded!"  `# Optional: not recommended` \
        -e GOTIFY_WARNING_MESSAGE="🟨 Backup completed with warnings."  `# Optional: not recommended` \
@@ -49,7 +49,7 @@ Duplicati Monitor is a Rust-based application designed to monitor Duplicati back
 1. Clone the repository:
    ```bash
    https://github.com/rodrigomaia06/duplicati_monitor.git
-   cd <repository-name>
+   cd duplicati_monitor
    ```
 
 2. Build the binary:
@@ -59,7 +59,7 @@ Duplicati Monitor is a Rust-based application designed to monitor Duplicati back
 
 3. Run the binary with environment variables:
    ```bash
-   GOTIFY_SERVER_URL="<example.internal.org>" \ `# Required`
+   GOTIFY_SERVER_URL="<https://example.internal.org>" \ `# Required`
    GOTIFY_APP_TOKEN="AOF***-ZHx9u****" \        `# Required`
    GOTIFY_SUCCESS_MESSAGE="🟩 Backup succeeded!" \  `# Optional: not recommended`
    GOTIFY_WARNING_MESSAGE="🟨 Backup completed with warnings." \  `# Optional: not recommended`
@@ -77,7 +77,7 @@ The application supports the following environment variables for customization:
 
 | Variable                    | Description                                                                                   | Default Value                                                     | Required/Recommended                                                                 |
 |-----------------------------|-----------------------------------------------------------------------------------------------|-------------------------------------------------------------------|-------------------------------------------------------------------------------------|
-| **`GOTIFY_SERVER_URL`**     | The URL of the Gotify server.                                                                 | `<example.internal.org>`                             | **Required**                                                                        |
+| **`GOTIFY_SERVER_URL`**     | The URL of the Gotify server.                                                                 | `<https://example.internal.org>`                             | **Required**                                                                        |
 | **`GOTIFY_APP_TOKEN`**      | The Gotify app token for authentication.                                                     | `AOF***-ZHx9u****`                                                 | **Required**                                                                        |
 | **`GOTIFY_SUCCESS_MESSAGE`**| Message sent for successful backups.                                                         | `💾🟢 Duplicati {operation-name}: {backup_name}`                   | **Recommendation**: Do not include in environment variables (use default).         |
 | **`GOTIFY_WARNING_MESSAGE`**| Message sent for backups with warnings.                                                      | `💾🟡 Duplicati {operation-name}: {backup_name}`                   | **Recommendation**: Do not include in environment variables (use default).         |
@@ -86,6 +86,15 @@ The application supports the following environment variables for customization:
 | **`GOTIFY_PRIORITY`**       | Priority level of Gotify notifications.                                                     | `10`                                                              | Optional                                                                            |
 | **`DEBUG_MODE`**            | Enables verbose logging.                                                                     | `false`                                                           | Optional                                                                            |
 
+
+## Setup Duplicati
+
+Add theses two options for each backup you want to monitor:
+
+- **send-http-result-output-format**: json
+- **send-http-url**: http://**IP_ADDRESS**:**PORT**/report
+
+![advanced-options](img/advanced-options.png)
 
 ## Debug Mode
 
