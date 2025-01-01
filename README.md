@@ -75,14 +75,17 @@ Duplicati Monitor is a Rust-based application designed to monitor Duplicati back
 
 The application supports the following environment variables for customization:
 
-- **`GOTIFY_SERVER_URL`** (*Required*): The URL of the Gotify server. Default: `https://gotify.internal.feynman.rip`.
-- **`GOTIFY_APP_TOKEN`** (*Required*): The Gotify app token for authentication. Default: `AOFaO-ZHx9uFaoY`.
-- **`GOTIFY_SUCCESS_MESSAGE`** (*Recommendation is not to include in the enviromental variables.*): Message sent for successful backups. Default: `💾🟢 Duplicati {operation-name}: {backup_name}`.
-- **`GOTIFY_WARNING_MESSAGE`** (*Recommendation is not to include in the enviromental variables.*): Message sent for backups with warnings. Default: `💾🟡 Duplicati {operation-name}: {backup_name}`.
-- **`GOTIFY_ERROR_MESSAGE`** (*Recommendation is not to include in the enviromental variables.*): Message sent for failed backups. Default: `💾🔴 Duplicati {operation-name}: {backup_name}`.
-- **`GOTIFY_MESSAGE_ITEMS`**: Comma-separated list of details to include in notifications. Default: `backup_name,machine_name,operation_name,deleted_files,added_files,examined_files,size_of_added_files,main_operation,parsed_result,duration`.
-- **`GOTIFY_PRIORITY`**: Priority level of Gotify notifications. Default: `10`.
-- **`DEBUG_MODE`**: Enables verbose logging. Default: `false`.
+| Variable                    | Description                                                                                   | Default Value                                                     | Required/Recommended                                                                 |
+|-----------------------------|-----------------------------------------------------------------------------------------------|-------------------------------------------------------------------|-------------------------------------------------------------------------------------|
+| **`GOTIFY_SERVER_URL`**     | The URL of the Gotify server.                                                                 | `https://gotify.internal.feynman.rip`                             | **Required**                                                                        |
+| **`GOTIFY_APP_TOKEN`**      | The Gotify app token for authentication.                                                     | `AOFaO-ZHx9uFaoY`                                                 | **Required**                                                                        |
+| **`GOTIFY_SUCCESS_MESSAGE`**| Message sent for successful backups.                                                         | `💾🟢 Duplicati {operation-name}: {backup_name}`                   | **Recommendation**: Do not include in environment variables (use default).         |
+| **`GOTIFY_WARNING_MESSAGE`**| Message sent for backups with warnings.                                                      | `💾🟡 Duplicati {operation-name}: {backup_name}`                   | **Recommendation**: Do not include in environment variables (use default).         |
+| **`GOTIFY_ERROR_MESSAGE`**  | Message sent for failed backups.                                                             | `💾🔴 Duplicati {operation-name}: {backup_name}`                   | **Recommendation**: Do not include in environment variables (use default).         |
+| **`GOTIFY_MESSAGE_ITEMS`**  | Comma-separated list of details to include in notifications.                                 | `backup_name,machine_name,operation_name,deleted_files,added_files,examined_files,size_of_added_files,main_operation,parsed_result,duration` | Optional                                                                          |
+| **`GOTIFY_PRIORITY`**       | Priority level of Gotify notifications.                                                     | `10`                                                              | Optional                                                                            |
+| **`DEBUG_MODE`**            | Enables verbose logging.                                                                     | `false`                                                           | Optional                                                                            |
+
 
 ## Debug Mode
 

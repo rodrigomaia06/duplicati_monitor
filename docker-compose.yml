@@ -1,0 +1,15 @@
+services:
+  duplicati-monitor:
+    image: ghcr.io/rodrigomaia06/duplicati_monitor:latest
+    container_name: duplicati-monitor
+    restart: unless-stopped
+    ports:
+      - "5050:5050"
+    environment:
+      GOTIFY_SERVER_URL: "<example.internal.org>" # Required
+      GOTIFY_APP_TOKEN: "AOF***-ZHx9u****"        # Required
+      GOTIFY_SUCCESS_MESSAGE: "🟩 Backup succeeded!" # Optional: not recommended
+      GOTIFY_WARNING_MESSAGE: "🟨 Backup completed with warnings." # Optional: not recommended
+      GOTIFY_ERROR_MESSAGE: "🟥 Backup failed."    # Optional: not recommended
+      GOTIFY_MESSAGE_ITEMS: "machine_name,parsed_result,duration" # Optional
+      DEBUG_MODE: "false"                          # Optional
