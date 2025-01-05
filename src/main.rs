@@ -69,6 +69,37 @@ fn is_debug_mode() -> bool {
         == "true"
 }
 
+fn better_formatting_size(size_bytes: u64) -> String {
+    const TB: u64 = 1024 * 1024 * 1024 * 1024;
+    const GB: u64 = 1024 * 1024 * 1024;
+    const MB: u64 = 1024 * 1024;
+    const KB: u64 = 1024;
+
+    if size_bytes >= TB {
+        format!("{:.3} TB", size_bytes as f64 / TB as f64)
+    } else if size_bytes >= GB {
+        format!("{:.3} GB", size_bytes as f64 / GB as f64)
+    } else if size_bytes >= MB {
+        format!("{:.3} MB", size_bytes as f64 / MB as f64)
+    } else if size_bytes >= KB {
+        format!("{:.3} KB", size_bytes as f64 / KB as f64)
+    } else {
+        format!("{} bytes", size_bytes)
+    }
+}
+
+fn better_formatting_duration(duration: String) -> String {
+    let parts: Vec<&str> = duration.split(':').collect();
+    if parts.len() == 3 {
+        let hours = parts[0].parse::<u32>().unwrap_or(0);
+        let minutes = parts[1].parse::<u32>().unwrap_or(0);
+        let seconds = parts[2].parse::<f64>().unwrap_or(0.0);
+        format!("{}h {}m {:.0}s", hours, minutes, seconds)
+    } else {
+        "Invalid duration format".to_string()
+    }
+}
+
 async fn construct_gotify_payload(Json(duplicati_payload): Json<DuplicatiPayload>) -> Result<GotifyPayload, Box<dyn Error>> {
     
     print!("{}", "[INFO] Received DuplicatiPayload: ".green().bold());
@@ -118,7 +149,7 @@ async fn construct_gotify_payload(Json(duplicati_payload): Json<DuplicatiPayload
                 message.push_str(&format!("Examined Files: {}\n", duplicati_payload.data.examined_files));
             }
             "size_of_added_files" => {
-                message.push_str(&format!("Size of Added Files: {}\n", duplicati_payload.data.size_of_added_files));
+                message.push_str(&format!("Size of Added Files: {}\n", better_formatting_size(duplicati_payload.data.size_of_added_files)));
             }
             "main_operation" => {
                 message.push_str(&format!("Main Operation: {}\n", duplicati_payload.data.main_operation));
@@ -127,7 +158,7 @@ async fn construct_gotify_payload(Json(duplicati_payload): Json<DuplicatiPayload
                 message.push_str(&format!("Parsed Result: {}\n", duplicati_payload.data.parsed_result));
             }
             "duration" => {
-                message.push_str(&format!("Duration: {}\n", duplicati_payload.data.duration));
+                message.push_str(&format!("Duration: {}\n", better_formatting_duration(duplicati_payload.data.duration.clone())));
             }
             "operation_name" => {
                 message.push_str(&format!("Operation Name: {}\n", duplicati_payload.extra.operation_name));
